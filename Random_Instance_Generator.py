@@ -46,13 +46,15 @@ def MOP_Generator(n,m,J,U):
         coef_temp = coef_temp.replace(']','')
         file.write(coef_temp)
         file.write("\n")
-
+        counter = 0
     for constraint_coef_list in range(m):
+        counter+= 1
         constraint_coef = ''.join(str(a_total_list[constraint_coef_list].tolist()).split(','))
         constraint_coef = constraint_coef.replace('[','')
         constraint_coef = constraint_coef.replace(']','')
         file.write(constraint_coef)
-        file.write("\n")
+        if counter != m:
+            file.write("\n")
     file.close()
                 
 
@@ -60,7 +62,7 @@ def MOP_Generator(n,m,J,U):
     return c_total_list, a_total_list, b
 
     
-MOP_Generator(5,2,30,2)
+MOP_Generator(5,1,2,40)
 
 
 
