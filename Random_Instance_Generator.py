@@ -8,7 +8,7 @@ def MOP_Generator(n,m,J,U):
     U upperbound for c_i and a_i_k 
     '''
     
-    np.random.seed(12345)
+    np.random.seed(21)
 
     c_total_list = []
     a_total_list = []
