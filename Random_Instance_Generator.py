@@ -16,7 +16,7 @@ def MOP_Generator(n,m,J,U):
 
     #Generate c_i_J
     for each_J in range(J):
-        c_total_list.append(np.random.randint(low=1, high=U+1,size = n))
+        c_total_list.append(-np.random.randint(low=1, high=U+1,size = n))
     
     #Generate a_i_k
     for each_k in range(m):
