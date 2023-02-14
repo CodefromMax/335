@@ -1,5 +1,6 @@
 import numpy as np
 import math
+np.random.seed(21)
 def MOP_Generator(n,m,J,U):
     '''
     n = # of items (x: 1 or 0)
@@ -8,7 +9,7 @@ def MOP_Generator(n,m,J,U):
     U upperbound for c_i and a_i_k 
     '''
     
-    np.random.seed(21)
+    #np.random.seed(21)
 
     c_total_list = []
     a_total_list = []
@@ -64,7 +65,6 @@ def MOP_Generator(n,m,J,U):
     return c_total_list, a_total_list, b
 
     
-MOP_Generator(5,1,2,40)
-
+#MOP_Generator(5,1,2,40)
 
 
