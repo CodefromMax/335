@@ -11,6 +11,7 @@ import itertools
 import os
 import gurobipy as gp
 from gurobipy import GRB
+gp.setParam("OutputFlag", 0)
 
 def read_instance(file_name):
     l = []
@@ -54,7 +55,6 @@ def read_instance(file_name):
 
 def get_single_objective_model(n,C, A, B, objective=1):
     model = gp.Model(f'z{objective}')
-
     J = len(C)#Check#######################
     m = len(A)
     # x is a binary decision variable with n dimensions
@@ -69,6 +69,7 @@ def get_single_objective_model(n,C, A, B, objective=1):
         
     # Set the objectives
     for i in range(J):
+
         model.addConstr(z[i] == gp.quicksum(C[i][j]*x[j] for j in range(n)))
 
 
@@ -132,13 +133,12 @@ def SolveKnapsack(filename, method=1):
     methodName = ''
     solution_time = 0.0
     current_time = time.time()
-  
+    
     if method == 1:
         methodName = "BF"
         # TODO: Read and solve an instance via Brute-Force method   
-
         n,b_k,c_i,a_ik = read_instance(filename)
-
+        
         feas_dec_x = []
         all_comb = list(itertools.product([0,1], repeat = int(n)))
     
@@ -194,13 +194,19 @@ def SolveKnapsack(filename, method=1):
         # TODO: Read and solve an instance via Rectangle Divison Method (RDM)
         FoundNDPs = []
         n,b_k,c_i,a_ik = read_instance(filename)
-
+        C_int = [cc.astype(int).tolist() for cc in c_i]
+        A_int = [a.astype(int).tolist() for a in a_ik]
+        b_int = [b.tolist() for b in b_k][0]
+        n = int(n[0])
+        first_lex = 0
+        second_lex = 0
         
-        model_z1 = get_single_objective_model(n,c_i, a_ik, b_k, objective=1)
-        model_z2 = get_single_objective_model(n,c_i, a_ik, b_k, objective=2)
+        model_z1 = get_single_objective_model(n,C_int, A_int, b_int, objective=1)
+        model_z2 = get_single_objective_model(n,C_int, A_int, b_int, objective=2)
         models = [model_z1, model_z2]
-        lexmin(models,1)
-
+        first_lex = lexmin(models,1)
+        second_lex = lexmin(models,2)
+        print(first_lex,second_lex)
     solution_time = time.time()-current_time
 
 
