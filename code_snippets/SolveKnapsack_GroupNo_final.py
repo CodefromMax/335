@@ -1,7 +1,6 @@
 # imports
 import numpy as np
 import itertools
-import matplotlib.pyplot as plt
 import time
 import copy
 import collections
@@ -144,18 +143,8 @@ def lexmin(model, J, first_obj=1, NW=None, SE=None):
     return None
 
 
-
-n = 5
-m = 2
-J = 2
-
-region = [0, 0]
-
-# Lambda
-lam = [1, 1]
-
 # Create the model object
-def get_weighted_sum_model(C, A, B, region, lam):
+def get_weighted_sum_model(n,m, J, C, A, B, region, lam):
     model = gp.Model()
 
     # x is a binary decision variable with n dimensions
@@ -321,11 +310,27 @@ def SolveKnapsack(filename, method=1):
                 FoundNDPs.append(z_2)
                 Rectangles.append([R_3[0],z_2])
         
-        
+
+    elif method == 3:
+        methodName = "SPM"
+        # TODO: Read and solve an instance via Supernal Method (SPM)
+        FoundNDPs = []
+        n,b_k,c_i,a_ik = read_instance(filename)
+        C_int = [cc.astype(int).tolist() for cc in c_i]
+        A_int = [a.astype(int).tolist() for a in a_ik]
+        b_int = [b.tolist() for b in b_k][0]
+        n = int(n[0])
+        first_lex = 0
+        second_lex = 0
+        m = len(A_int)
+        J = len(C_int)
+        lam = [1,1]
+        region = list(0 for i in range(J))
+        model = get_weighted_sum_model(n, m, J, C_int, A_int, b_int, region, lam)
+        FoundNDPs.append(3)#place holder
 
     
     solution_time = time.time()-current_time
-
 
 
     # Output result
@@ -346,5 +351,7 @@ def SolveKnapsack(filename, method=1):
     
     # return nondominated_Z
     return ndp_array
+
+    
 
 print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",2))
