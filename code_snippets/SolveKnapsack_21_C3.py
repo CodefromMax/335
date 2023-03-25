@@ -233,31 +233,33 @@ def SolveKnapsack(filename, method=1):
             # `print`(picked_rect)
             Rectangles.remove(picked_rect)
             
-            R_2 = [(picked_rect[0],(picked_rect[0][1]+picked_rect[1][1])/2),picked_rect[1]]
+            # Bisect to creat the bottom rectangle
+            R_2 = [[picked_rect[0][0],(picked_rect[0][1]+picked_rect[1][1])/2],picked_rect[1]]
             # print(R_2[0][0][0])
             # print(R_2[0][1])
-            z_1 = lexmin(model,J, first_obj=1,NW = [R_2[0][0][0],R_2[0][1]],SE = R_2[1])
+            z_1 = lexmin(model,J, first_obj=1, NW = R_2[0], SE = R_2[1])
 
             if z_1 != R_2[1]:
                 FoundNDPs.append(z_1)
                 Rectangles.append([z_1,R_2[1]])
 
-                #Check if use R_2[0], Z1, -1 , 
-            R_3 = [picked_rect[0],(z_1[0]-1,(picked_rect[0][1]+picked_rect[1][1])/2)]
-            z_2 = lexmin(model,J,first_obj =2, NW = R_3[0],SE = [R_3[1][0],R_3[1][1]])
+            # Refine the top rectangle 
+            R_3 = [picked_rect[0],[z_1[0]-1,(picked_rect[0][1]+picked_rect[1][1])/2]]
+            z_2 = lexmin(model,J,first_obj =2, NW = R_3[0],SE = R_3[1])
+            
             if z_2 != R_3[0]:
                 FoundNDPs.append(z_2)
                 Rectangles.append([R_3[0],z_2])
-        
-        
 
-    
+
+
+
     solution_time = time.time()-current_time
 
 
 
 
-    
+
 
     # Output result
     ndp_filename = f'{methodName}_NDP_{groupNo}.txt'
