@@ -223,13 +223,14 @@ def SolveKnapsack(filename, method=1):
         FoundNDPs.append(first_lex)
         FoundNDPs.append(second_lex)
 
-
-        # print(first_lex,second_lex)
-
+       
+        #print(first_lex,second_lex)
+    
         Rectangles = [[first_lex,second_lex]]
         while len(Rectangles) != 0:
+        
             picked_rect = Rectangles[0]
-            # print(picked_rect)
+            # `print`(picked_rect)
             Rectangles.remove(picked_rect)
             
             R_2 = [(picked_rect[0],(picked_rect[0][1]+picked_rect[1][1])/2),picked_rect[1]]
@@ -277,4 +278,4 @@ def SolveKnapsack(filename, method=1):
     # return nondominated_Z
     return ndp_array
 
-print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",2))
+#print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",2))
