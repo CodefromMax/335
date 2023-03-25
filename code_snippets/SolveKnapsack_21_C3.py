@@ -77,7 +77,7 @@ def get_model(n, m, J, C, A, B):
 
     # The x in \mathcal X constraint
     for i in range(m):
-        model.addConstr(gp.quicksum(A[i][j]*x[j] for j in range(n)) <= B[i])
+        model.addConstr(gp.quicksum(A[i][j]*x[j] for j in range(n)) <= B[i][0])
 
     # The constraints imposed by the region. Since we have defined the objective as 
     # a variable, we can simply modify its upper bound to impose the constraint.
@@ -209,7 +209,7 @@ def SolveKnapsack(filename, method=1):
         n,b_k,c_i,a_ik = read_instance(filename)
         C_int = [cc.astype(int).tolist() for cc in c_i]
         A_int = [a.astype(int).tolist() for a in a_ik]
-        b_int = [b.tolist() for b in b_k][0]
+        b_int = [b.tolist() for b in b_k]
         n = int(n[0])
         first_lex = 0
         second_lex = 0
