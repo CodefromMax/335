@@ -79,7 +79,7 @@ def get_model(n, m, J, C, A, B):
 
     # The x in \mathcal X constraint
     for i in range(m):
-        model.addConstr(gp.quicksum(A[i][j]*x[j] for j in range(n)) <= B[i])
+        model.addConstr(gp.quicksum(A[i][j]*x[j] for j in range(n)) <= B[i][0])
 
     # The constraints imposed by the region. Since we have defined the objective as 
     # a variable, we can simply modify its upper bound to impose the constraint.
@@ -179,26 +179,32 @@ def get_weighted_sum_model(n,m, J, C, A, B, region, lam):
                        sense=gp.GRB.MINIMIZE)
     
     return model
+ 
 
-model_ws = get_weighted_sum_model(C, A, B, region, lam)
-model_ws.optimize()
+def supernal (n,m, J, C, A, B, region, lam):
+    region = [0]*J
+    z =[]
 
-x_var = model_ws._x
-x_sol = [int(x_var[j].x) for j in range(n)]
-x_sol
+    model = get_weighted_sum_model(n,m, J, C, A, B, region, lam)
 
-z_n = np.dot(C, x_sol)
-z_n
+    # Checking the model status to verify if the model is solved to optimality
+    if model.status == 2:
+        x_var = model._x
+        x_sol = [int(x_var[j].x) for j in range(n)]
 
-
-region = [-66, 0]
-
-z_vars = model_ws._z
-for i in range(J):
-    z_vars[i].ub = region[i]
-
-
-
+        z_n = np.dot(C, x_sol)
+        
+        z_vars = model._z
+        
+        for i in range(J):
+            z_vars[i].ub = region[i]
+        
+        z.append(z_n)
+                
+        # Optimize
+        model.update()
+        model.optimize()
+        
 
 
 
