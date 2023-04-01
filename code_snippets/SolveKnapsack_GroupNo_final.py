@@ -7,6 +7,7 @@ import collections
 import queue as Q
 import pandas as pd
 import scipy as sp
+import os
 
 
 import gurobipy as gp
@@ -172,14 +173,13 @@ def get_weighted_sum_model(n, m, J, C, A, B, region, lam):
     # a variable, we can simply modify its upper bound to impose the constraint.
     for i in range(J):
         z[i].ub = region[i]
-        z[i].lb = -gp.GRB.INFINITYZz
+        z[i].lb = -gp.GRB.INFINITY
 
     # Objective
     model.setObjective(gp.quicksum(lam[i]*z[i] for i in range(J)), 
                        sense=gp.GRB.MINIMIZE)
     
     return model
-        
 
 
 
@@ -320,7 +320,7 @@ def SolveKnapsack(filename, method=1):
                 x_sol = [int(x_var[j].x) for j in range(n)]
                 z_n = np.dot(C_int, x_sol)
                 FoundNDPs.append(z_n)
-                print("z_n:",z_n)
+                #print("z_n:",z_n)
 
                 for i in Regions:
                     #print("region:",Regions)
@@ -329,9 +329,9 @@ def SolveKnapsack(filename, method=1):
                         for j in range(J):
                             #print("i:", i)
                             z_new = i.copy()
-                            print("z_new: ",z_new)
+                            #print("z_new: ",z_new)
                             z_new[j] = z_n[j]-1
-                            print("new: ",z_new)
+                            #print("new: ",z_new)
                             Regions.append(z_new)
                 
                 if J >= 3:
@@ -375,4 +375,4 @@ def SolveKnapsack(filename, method=1):
 
     
 
-print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",2))
+print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",3))
