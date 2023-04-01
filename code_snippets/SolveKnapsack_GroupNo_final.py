@@ -144,7 +144,7 @@ def lexmin(model, J, first_obj=1, NW=None, SE=None):
 
 
 # Create the model object
-def get_weighted_sum_model(n,m, J, C, A, B, region, lam):
+def get_weighted_sum_model(n, m, J, C, A, B, region, lam):
     model = gp.Model()
 
     # x is a binary decision variable with n dimensions
@@ -172,38 +172,13 @@ def get_weighted_sum_model(n,m, J, C, A, B, region, lam):
     # a variable, we can simply modify its upper bound to impose the constraint.
     for i in range(J):
         z[i].ub = region[i]
-        z[i].lb = -gp.GRB.INFINITY
+        z[i].lb = -gp.GRB.INFINITYZz
 
     # Objective
     model.setObjective(gp.quicksum(lam[i]*z[i] for i in range(J)), 
                        sense=gp.GRB.MINIMIZE)
     
     return model
- 
-
-def supernal (n,m, J, C, A, B, region, lam):
-    region = [0]*J
-    z =[]
-
-    model = get_weighted_sum_model(n,m, J, C, A, B, region, lam)
-
-    # Checking the model status to verify if the model is solved to optimality
-    if model.status == 2:
-        x_var = model._x
-        x_sol = [int(x_var[j].x) for j in range(n)]
-
-        z_n = np.dot(C, x_sol)
-        
-        z_vars = model._z
-        
-        for i in range(J):
-            z_vars[i].ub = region[i]
-        
-        z.append(z_n)
-                
-        # Optimize
-        model.update()
-        model.optimize()
         
 
 
@@ -326,14 +301,54 @@ def SolveKnapsack(filename, method=1):
         A_int = [a.astype(int).tolist() for a in a_ik]
         b_int = [b.tolist() for b in b_k]
         n = int(n[0])
-        first_lex = 0
-        second_lex = 0
         m = len(A_int)
         J = len(C_int)
-        lam = [1,1]
-        region = list(0 for i in range(J))
-        model = get_weighted_sum_model(n, m, J, C_int, A_int, b_int, region, lam)
-        FoundNDPs.append(3)#place holder
+        z_s = [0]*J   # supernal point of MOP
+        Regions = [z_s] # Initiallize the Regions list
+        lam = [1]*J # Lambda
+        num_region = 1
+
+        while len(Regions) != 0 :
+            picked_region = Regions[0] # pick a region in Regions list
+            model_ws = get_weighted_sum_model(n, m, J, C_int, A_int, b_int, picked_region, lam)
+            model_ws.optimize()  # find optimal solution
+            
+            # Checking the model status to verify if the model is solved to optimality (Feasible)
+            if model_ws.status == 2: 
+                num_region += J
+                x_var = model_ws._x
+                x_sol = [int(x_var[j].x) for j in range(n)]
+                z_n = np.dot(C_int, x_sol)
+                FoundNDPs.append(z_n)
+                print("z_n:",z_n)
+
+                for i in Regions:
+                    #print("region:",Regions)
+                    if (z_n <= i).all():
+                        Regions.remove(i)
+                        for j in range(J):
+                            #print("i:", i)
+                            z_new = i.copy()
+                            print("z_new: ",z_new)
+                            z_new[j] = z_n[j]-1
+                            print("new: ",z_new)
+                            Regions.append(z_new)
+                
+                if J >= 3:
+                    remove_index = []
+                    count = 0
+                    for i in range(len(Regions)):
+                        for j in range(len(Regions)):
+                            if all(Regions[i][k] <= Regions[j][k] for k in range(len(Regions[i]))) and i != j:
+                                remove_index.append(i)
+
+                    for i in remove_index:
+                        Regions.pop(i-count)
+                        count += 1           
+            
+            else:
+                Regions.remove(Regions[0])
+    
 
     
     solution_time = time.time()-current_time
