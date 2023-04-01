@@ -365,7 +365,7 @@ def SolveKnapsack(filename, method=1):
     ndp_array = ndp_array[np.flip(np.argsort(np.array(ndp_array)))]
     S_array = np.array([solution_time,
                         len(FoundNDPs),
-                        0])
+                        num_region])
     # Note: You must set delimiter to '\t' and newline to '\n'. Otherwise, points will be deducted.
     np.savetxt(curr_dir + ndp_filename, ndp_array,delimiter='\t',newline='\n')
     np.savetxt(curr_dir + summary_filename,S_array,delimiter='\t',newline='\n')
