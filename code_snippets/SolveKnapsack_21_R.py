@@ -238,7 +238,7 @@ def SolveKnapsack(filename, method=1):
             # `print`(picked_rect)
             Rectangles.remove(picked_rect)
             
-            # Bisect to creat the bottom rectangle
+            # Bisect to create the bottom rectangle
             R_2 = [[picked_rect[0][0],(picked_rect[0][1]+picked_rect[1][1])/2],picked_rect[1]]
             # print(R_2[0][0][0])
             # print(R_2[0][1])
@@ -271,12 +271,17 @@ def SolveKnapsack(filename, method=1):
 
     # TODO: Export NDP and Summary files
     curr_dir = os.getcwd() + '/'
-    
-    
+    # ndp_array = [tuple(set(s)) for s in np.array(FoundNDPs)]
+    # ndp_array = np.array(ndp_array,dtype=np.dtype([('x', int), ('y', int)]))
+    #ndp_array = np.array(ndp_array,dtype=np.dtype([('x', float), ('y', float)]))
     ndp_array = np.array(FoundNDPs)
     new = np.lexsort((ndp_array[:,1],ndp_array[:,0]))
     ndp_array = ndp_array[np.flip(new)]
 
+    
+
+    
+    # ndp_array = ndp_array[np.flip(np.argsort(np.array(ndp_array),axis = 0))]
     S_array = np.array([solution_time,
                         len(FoundNDPs),
                         0])
