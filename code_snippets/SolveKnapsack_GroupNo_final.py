@@ -357,14 +357,12 @@ def SolveKnapsack(filename, method=1):
                 Regions.remove(Regions[0])
                 #print("R",Regions)
     
-
-    
     solution_time = time.time()-current_time
 
 
     # Output result
-    ndp_filename = f'{methodName}_NDP_{groupNo}.txt'
-    summary_filename = f'{methodName}_SUMMARY_{groupNo}.txt'
+    ndp_filename = f'{methodName}_NDP_more_{groupNo}.txt'
+    summary_filename = f'{methodName}_SUMMARY_more_{groupNo}.txt'
 
     # TODO: Export NDP and Summary files
     
@@ -377,7 +375,7 @@ def SolveKnapsack(filename, method=1):
 
     S_array = np.array([solution_time,
                         len(FoundNDPs),
-                        0])
+                        num_region])
     # Note: You must set delimiter to '\t' and newline to '\n'. Otherwise, points will be deducted.
     np.savetxt(curr_dir + ndp_filename, ndp_array,delimiter='\t',newline='\n')
     np.savetxt(curr_dir + summary_filename,S_array,delimiter='\t',newline='\n')
@@ -389,4 +387,4 @@ def SolveKnapsack(filename, method=1):
     
 
 #print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",3))
-print(SolveKnapsack("inst_n375_m2_j2.txt",2))
+print(SolveKnapsack("inst_n375_m2_j2.txt",3))
