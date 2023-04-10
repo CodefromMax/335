@@ -13,8 +13,8 @@ import os
 import gurobipy as gp
 # Disable gurobi logging
 gp.setParam("OutputFlag", 0)
-gp.setParam("MIPGap", 0)
-
+#gp.setParam("MIPGap", 0)
+gp.setParam("MIPGap", 1e-6)
 
 
 def read_instance(file_name):
@@ -272,7 +272,7 @@ def SolveKnapsack(filename, method=1):
         Rectangles = [[first_lex,second_lex]]
         while len(Rectangles) != 0:
             picked_rect = Rectangles[0]
-            # print(picked_rect)
+            print(picked_rect)
             Rectangles.remove(picked_rect)
             
             R_2 = [(picked_rect[0],(picked_rect[0][1]+picked_rect[1][1])/2),picked_rect[1]]
@@ -282,6 +282,7 @@ def SolveKnapsack(filename, method=1):
 
             if z_1 != R_2[1]:
                 FoundNDPs.append(z_1)
+                print("z_1",z_1)
                 Rectangles.append([z_1,R_2[1]])
 
                 #Check if use R_2[0], Z1, -1 , 
@@ -289,6 +290,7 @@ def SolveKnapsack(filename, method=1):
             z_2 = lexmin(model,J,first_obj =2, NW = R_3[0],SE = [R_3[1][0],R_3[1][1]])
             if z_2 != R_3[0]:
                 FoundNDPs.append(z_2)
+                print("z_2",z_2)
                 Rectangles.append([R_3[0],z_2])
         
 
@@ -320,7 +322,7 @@ def SolveKnapsack(filename, method=1):
                 x_sol = [int(x_var[j].x) for j in range(n)]
                 z_n = np.dot(C_int, x_sol)
                 FoundNDPs.append(z_n)
-                #print("z_n:",z_n)
+                print("z_n:",z_n)
 
                 for i in Regions:
                     #print("region:",Regions)
@@ -347,7 +349,9 @@ def SolveKnapsack(filename, method=1):
                         count += 1           
             
             else:
+                print("removed",Regions[0])
                 Regions.remove(Regions[0])
+                print("R",Regions)
     
 
     
@@ -359,20 +363,26 @@ def SolveKnapsack(filename, method=1):
     summary_filename = f'{methodName}_SUMMARY_{groupNo}.txt'
 
     # TODO: Export NDP and Summary files
+    
     curr_dir = os.getcwd() + '/'
-    ndp_array = [tuple(set(s)) for s in np.array(FoundNDPs)]
-    ndp_array = np.array(ndp_array,dtype=np.dtype([('x', int), ('y', int)]))
-    ndp_array = ndp_array[np.flip(np.argsort(np.array(ndp_array)))]
+    
+    
+    ndp_array = np.array(FoundNDPs)
+    new = np.lexsort((ndp_array[:,1],ndp_array[:,0]))
+    ndp_array = ndp_array[np.flip(new)]
+
     S_array = np.array([solution_time,
                         len(FoundNDPs),
-                        num_region])
+                        0])
     # Note: You must set delimiter to '\t' and newline to '\n'. Otherwise, points will be deducted.
     np.savetxt(curr_dir + ndp_filename, ndp_array,delimiter='\t',newline='\n')
     np.savetxt(curr_dir + summary_filename,S_array,delimiter='\t',newline='\n')
     
     # return nondominated_Z
     return ndp_array
+   
 
     
 
-print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",3))
+#print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",3))
+print(SolveKnapsack("inst_n375_m2_j2.txt",2))
