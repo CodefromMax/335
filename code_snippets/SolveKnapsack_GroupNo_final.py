@@ -181,7 +181,11 @@ def get_weighted_sum_model(n, m, J, C, A, B, region, lam):
     
     return model
 
+def get_supernal_z(n, C, model):
+  x_var = model._x
+  x_sol = [int(np.round(x_var[i].x)) for i in range(n)]
 
+  return np.dot(C, x_sol)
 
 def SolveKnapsack(filename, method=1):  
     # Dummy group number. Should be replaced by your number
@@ -297,7 +301,6 @@ def SolveKnapsack(filename, method=1):
     elif method == 3:
         methodName = "SPM"
         # TODO: Read and solve an instance via Supernal Method (SPM)
-        FoundNDPs = []
         n,b_k,c_i,a_ik = read_instance(filename)
         C_int = [cc.astype(int).tolist() for cc in c_i]
         A_int = [a.astype(int).tolist() for a in a_ik]
@@ -305,35 +308,36 @@ def SolveKnapsack(filename, method=1):
         n = int(n[0])
         m = len(A_int)
         J = len(C_int)
+
+        FoundNDPs = []
         z_s = [0]*J   # supernal point of MOP
         Regions = [z_s] # Initiallize the Regions list
         lam = [1]*J # Lambda
         num_region = 1
+        # Only called once before the while-loop
+        model = get_weighted_sum_model(n, m, J, C_int, A_int, b_int, z_s, lam)
 
         while len(Regions) != 0 :
             picked_region = Regions[0] # pick a region in Regions list
-            model_ws = get_weighted_sum_model(n, m, J, C_int, A_int, b_int, picked_region, lam)
-            model_ws.optimize()  # find optimal solution
-            
+            # Reuse model. Only update bounds instead of creating a new model.
+            for i, r in enumerate(picked_region):
+                model._z[i].ub = r
+            model.update()
+            model.optimize()
+
             # Checking the model status to verify if the model is solved to optimality (Feasible)
-            if model_ws.status == 2: 
+            if model.status == 2: 
                 num_region += J
-                x_var = model_ws._x
-                x_sol = [int(x_var[j].x) for j in range(n)]
-                z_n = np.dot(C_int, x_sol)
+                z_n = get_supernal_z(n, C_int, model)
                 FoundNDPs.append(z_n)
-                print("z_n:",z_n)
+                #print("z_n:",z_n)
 
                 for i in Regions:
-                    #print("region:",Regions)
                     if (z_n <= i).all():
                         Regions.remove(i)
                         for j in range(J):
-                            #print("i:", i)
                             z_new = i.copy()
-                            #print("z_new: ",z_new)
                             z_new[j] = z_n[j]-1
-                            #print("new: ",z_new)
                             Regions.append(z_new)
                 
                 if J >= 3:
@@ -349,9 +353,9 @@ def SolveKnapsack(filename, method=1):
                         count += 1           
             
             else:
-                print("removed",Regions[0])
+                #print("removed",Regions[0])
                 Regions.remove(Regions[0])
-                print("R",Regions)
+                #print("R",Regions)
     
 
     
