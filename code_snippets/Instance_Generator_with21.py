@@ -74,7 +74,7 @@ def MOP_Generator(n,m,J,U):
 
 
 while True:
-    inst = MOP_Generator(5,1,2,40)
+    inst = MOP_Generator(30,1,2,40)
     
     # n,b_k,c_i,a_ik
     Z_n= SolveKnapsack_21_C2.SolveKnapsack(inst)
