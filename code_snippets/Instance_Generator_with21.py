@@ -82,9 +82,9 @@ def MOP_Generator(n,m,J,U):
 #     if len(Z_n) >= 3:
 #         break
 
-# for i in range(22,30):
+# for i in range(26,101):
 #     print(i)
-#     # c_i,a_ik, b_k = Instance_Generator_with21.MOP_Generator(n = i,m=1,J = 2, U = 40)
+#     MOP_Generator(n = i,m=1,J = 2, U = 40)
 
 #     while True:
 #         intl = MOP_Generator(i,1,2,40)

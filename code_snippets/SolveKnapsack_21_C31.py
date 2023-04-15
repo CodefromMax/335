@@ -210,16 +210,15 @@ def SolveKnapsack(filename, method=1):
         FoundNDPs = []
         n,b_k,c_i,a_ik = read_instance(filename)
         C_int = [cc.astype(int).tolist() for cc in c_i]
-        A_int = [a.astype(int).tolist() for a in a_ik]  
+        A_int = [a.astype(int).tolist() for a in a_ik]
         b_int = [b.tolist() for b in b_k]
-        C_int.reverse()
         n = int(n[0])
         first_lex = 0
         second_lex = 0
         m = len(A_int)
         J = len(C_int)
-        model = get_model(n, m, J, C_int, A_int, b_int)
         
+        model = get_model(n, m, J, C_int, A_int, b_int)       
         first_lex = lexmin(model,J, 1)
         second_lex = lexmin(model,J, 2)
 
@@ -237,6 +236,11 @@ def SolveKnapsack(filename, method=1):
             # `print`(picked_rect)
             Rectangles.remove(picked_rect)
             
+            if picked_rect[1][0] - picked_rect[0][0] == 1:
+                continue
+            if picked_rect[0][1] - picked_rect[1][1] == 1:
+                continue
+
             # Bisect to creat the bottom rectangle
             R_2 = [[picked_rect[0][0],(picked_rect[0][1]+picked_rect[1][1])/2],picked_rect[1]]
             # print(R_2[0][0][0])
@@ -244,10 +248,8 @@ def SolveKnapsack(filename, method=1):
             z_1 = lexmin(model,J, first_obj=1, NW = R_2[0], SE = R_2[1])
 
             if z_1 != R_2[1]:
-                
                 FoundNDPs.append(z_1)
                 Rectangles.append([z_1,R_2[1]])
-                
 
             # Refine the top rectangle 
             R_3 = [picked_rect[0],[z_1[0]-1,(picked_rect[0][1]+picked_rect[1][1])/2]]
@@ -256,36 +258,37 @@ def SolveKnapsack(filename, method=1):
             if z_2 != R_3[0]:
                 FoundNDPs.append(z_2)
                 Rectangles.append([R_3[0],z_2])
-                
+
+
 
     solution_time = time.time()-current_time
 
 
 
 
+    return solution_time,FoundNDPs
 
+    # # Output result
+    # ndp_filename = f'{methodName}_NDP_{groupNo}_large.txt'
+    # summary_filename = f'{methodName}_SUMMARY_{groupNo}_large.txt'
 
-    # Output result
-    ndp_filename = f'{methodName}_NDP_{groupNo}_reverse.txt'
-    summary_filename = f'{methodName}_SUMMARY_{groupNo}_reverse.txt'
-
-    # TODO: Export NDP and Summary files
-    curr_dir = os.getcwd() + '/'
+    # # TODO: Export NDP and Summary files
+    # curr_dir = os.getcwd() + '/'
     
-    [p.reverse() for p in FoundNDPs]
-    ndp_array = np.array(FoundNDPs)
-    new = np.lexsort((ndp_array[:,1],ndp_array[:,0]))
-    ndp_array = ndp_array[np.flip(new)]
+    
+    # ndp_array = np.array(FoundNDPs)
+    # new = np.lexsort((ndp_array[:,1],ndp_array[:,0]))
+    # ndp_array = ndp_array[np.flip(new)]
 
-    S_array = np.array([solution_time,
-                        len(FoundNDPs),
-                        0])
-    # Note: You must set delimiter to '\t' and newline to '\n'. Otherwise, points will be deducted.
-    np.savetxt(curr_dir + ndp_filename, ndp_array,delimiter='\t',newline='\n')
-    np.savetxt(curr_dir + summary_filename,S_array,delimiter='\t',newline='\n')
+    # S_array = np.array([solution_time,
+    #                     len(FoundNDPs),
+    #                     0])
+    # # Note: You must set delimiter to '\t' and newline to '\n'. Otherwise, points will be deducted.
+    # np.savetxt(curr_dir + ndp_filename, ndp_array,delimiter='\t',newline='\n')
+    # np.savetxt(curr_dir + summary_filename,S_array,delimiter='\t',newline='\n')
     
     # return nondominated_Z
-    return ndp_array
+    # return ndp_array
 
-print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",2))
+# print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",2))
 #print(SolveKnapsack("inst_n375_m2_j2.txt",2))
