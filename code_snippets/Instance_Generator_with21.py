@@ -74,10 +74,10 @@ def MOP_Generator(n,m,J,U):
 
 
 while True:
-    inst = MOP_Generator(100,2,2,40)
+    inst = MOP_Generator(50,2,4,40)
     
     # n,b_k,c_i,a_ik
     Z_n= SolveKnapsack_21_C2.SolveKnapsack(inst)
 
-    if len(Z_n) >= 3:
+    if len(Z_n) >= 5:
         break
