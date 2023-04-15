@@ -105,7 +105,7 @@ def lexmin(model, J, first_obj=1, NW=None, SE=None):
         z2.ub, z2.lb = NW[1], SE[1]               # SE.y <= z2 <= NW.y
     else:
         raise ValueError('Invalid NW and SE')
-        
+      
     # .Obj allows you modify the objective coefficient of a given variable
     # Modify the objective to: 1 x z_1 + 0 x z_2 = z_1 if first_obj == 1
     # Or modify the objective to: 0 x z_1 + 1 x z_2 = z_2 if first_obj == 2
@@ -120,8 +120,6 @@ def lexmin(model, J, first_obj=1, NW=None, SE=None):
     
     # Checking the model status to verify if the model is solved to optimality
     if model.status == 2:
-
-
 
         first_obj_val = int(np.round(model.objval))
         
@@ -266,8 +264,8 @@ def SolveKnapsack(filename, method=1):
 
 
     # Output result
-    ndp_filename = f'{methodName}_NDP_{groupNo}.txt'
-    summary_filename = f'{methodName}_SUMMARY_{groupNo}.txt'
+    ndp_filename = f'{methodName}_NDP_{groupNo}_large.txt'
+    summary_filename = f'{methodName}_SUMMARY_{groupNo}_large.txt'
 
     # TODO: Export NDP and Summary files
     curr_dir = os.getcwd() + '/'
