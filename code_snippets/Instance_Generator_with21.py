@@ -82,14 +82,14 @@ def MOP_Generator(n,m,J,U):
 #     if len(Z_n) >= 3:
 #         break
 
-for i in range(22,30):
-    print(i)
-    # c_i,a_ik, b_k = Instance_Generator_with21.MOP_Generator(n = i,m=1,J = 2, U = 40)
+# for i in range(22,30):
+#     print(i)
+#     # c_i,a_ik, b_k = Instance_Generator_with21.MOP_Generator(n = i,m=1,J = 2, U = 40)
 
-    while True:
-        intl = MOP_Generator(i,1,2,40)
+#     while True:
+#         intl = MOP_Generator(i,1,2,40)
     
-        # n,b_k,c_i,a_ik
-        Z_n= SolveKnapsack_21_C2.SolveKnapsack(intl)
-        if len(Z_n) >= 3:
-            break
+#         # n,b_k,c_i,a_ik
+#         Z_n= SolveKnapsack_21_C2.SolveKnapsack(intl)
+#         if len(Z_n) >= 3:
+#             break
