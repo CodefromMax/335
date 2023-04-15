@@ -330,9 +330,10 @@ def SolveKnapsack(filename, method=1):
                 num_region += J
                 z_n = get_supernal_z(n, C_int, model)
                 FoundNDPs.append(z_n)
-                #print("z_n:",z_n)
+                print("z_n:",z_n)
 
-                for i in Regions:
+                Region = Regions.copy()
+                for i in Region:
                     if (z_n <= i).all():
                         Regions.remove(i)
                         for j in range(J):
@@ -350,8 +351,7 @@ def SolveKnapsack(filename, method=1):
 
                     for i in remove_index:
                         Regions.pop(i-count)
-                        count += 1           
-            
+                        count += 1
             else:
                 #print("removed",Regions[0])
                 Regions.remove(Regions[0])
@@ -361,8 +361,8 @@ def SolveKnapsack(filename, method=1):
 
 
     # Output result
-    ndp_filename = f'{methodName}_NDP_more_{groupNo}.txt'
-    summary_filename = f'{methodName}_SUMMARY_more_{groupNo}.txt'
+    ndp_filename = f'{methodName}_NDP_375_{groupNo}.txt'
+    summary_filename = f'{methodName}_SUMMARY_375_{groupNo}.txt'
 
     # TODO: Export NDP and Summary files
     
@@ -387,4 +387,5 @@ def SolveKnapsack(filename, method=1):
     
 
 #print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",3))
-print(SolveKnapsack("inst_n375_m2_j2.txt",3))
+#print(SolveKnapsack("inst_n375_m2_j2.txt",3))
+#print(SolveKnapsack("test_inst_2.txt",3))
