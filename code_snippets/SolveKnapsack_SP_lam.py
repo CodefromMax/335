@@ -312,7 +312,8 @@ def SolveKnapsack(filename, method=1):
         FoundNDPs = []
         z_s = [0]*J   # supernal point of MOP
         Regions = [z_s] # Initiallize the Regions list
-        lam = [1]*J # Lambda
+        lam = [J-i for i in range(J)]
+
         num_region = 1
         # Only called once before the while-loop
         model = get_weighted_sum_model(n, m, J, C_int, A_int, b_int, z_s, lam)
@@ -360,8 +361,8 @@ def SolveKnapsack(filename, method=1):
 
 
     # Output result
-    ndp_filename = f'{methodName}_NDP_t2_{groupNo}.txt'
-    summary_filename = f'{methodName}_SUMMARY_t2_{groupNo}.txt'
+    ndp_filename = f'{methodName}_NDP_t2n_{groupNo}.txt'
+    summary_filename = f'{methodName}_SUMMARY_t2n_{groupNo}.txt'
 
     # TODO: Export NDP and Summary files
     
