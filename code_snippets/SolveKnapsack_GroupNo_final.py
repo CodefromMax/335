@@ -187,6 +187,16 @@ def get_supernal_z(n, C, model):
 
   return np.dot(C, x_sol)
 
+def quicksort(Z):
+    if len(Z) <= 1:
+        return Z
+    else:
+        piv = Z[len(Z)//2]
+        left = [x for x in Z if x < piv]
+        middle = [x for x in Z if x == piv]
+        right = [x for x in Z if x > piv]
+        return quicksort(left) + middle + quicksort(right)
+
 def SolveKnapsack(filename, method=1):  
     # Dummy group number. Should be replaced by your number
     groupNo = 21
@@ -194,7 +204,7 @@ def SolveKnapsack(filename, method=1):
     solution_time = 0.0
     current_time = time.time()
     
-    if method == 1:
+    if method == 1: 
         methodName = "BF"
         # TODO: Read and solve an instance via Brute-Force method   
         n,b_k,c_i,a_ik = read_instance(filename)
@@ -224,7 +234,8 @@ def SolveKnapsack(filename, method=1):
         #remove duplicated 
         Z_removed_dup = list(set(tuple(z) for z in Z))
 
-
+        # BF1: quicksort
+        Z_removed_dup = quicksort(Z_removed_dup)
 
         FoundNDPs = Z_removed_dup.copy()
 
