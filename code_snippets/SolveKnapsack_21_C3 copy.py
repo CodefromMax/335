@@ -217,8 +217,9 @@ def SolveKnapsack(filename, method=1):
         second_lex = 0
         m = len(A_int)
         J = len(C_int)
+        print(type(C_int[0][0]), type(A_int[0][0]), type(b_int[0][0]))
+        model = get_model(n, m, J, C_int, A_int, b_int)
         
-        model = get_model(n, m, J, C_int, A_int, b_int)       
         first_lex = lexmin(model,J, 1)
         second_lex = lexmin(model,J, 2)
 
@@ -261,29 +262,29 @@ def SolveKnapsack(filename, method=1):
 
 
 
-    return solution_time,FoundNDPs
 
-    # # Output result
-    # ndp_filename = f'{methodName}_NDP_{groupNo}_large.txt'
-    # summary_filename = f'{methodName}_SUMMARY_{groupNo}_large.txt'
 
-    # # TODO: Export NDP and Summary files
-    # curr_dir = os.getcwd() + '/'
+    # Output result
+    ndp_filename = f'{methodName}_NDP_{groupNo}_large.txt'
+    summary_filename = f'{methodName}_SUMMARY_{groupNo}_large.txt'
+
+    # TODO: Export NDP and Summary files
+    curr_dir = os.getcwd() + '/'
     
     
-    # ndp_array = np.array(FoundNDPs)
-    # new = np.lexsort((ndp_array[:,1],ndp_array[:,0]))
-    # ndp_array = ndp_array[np.flip(new)]
+    ndp_array = np.array(FoundNDPs)
+    new = np.lexsort((ndp_array[:,1],ndp_array[:,0]))
+    ndp_array = ndp_array[np.flip(new)]
 
-    # S_array = np.array([solution_time,
-    #                     len(FoundNDPs),
-    #                     0])
-    # # Note: You must set delimiter to '\t' and newline to '\n'. Otherwise, points will be deducted.
-    # np.savetxt(curr_dir + ndp_filename, ndp_array,delimiter='\t',newline='\n')
-    # np.savetxt(curr_dir + summary_filename,S_array,delimiter='\t',newline='\n')
+    S_array = np.array([solution_time,
+                        len(FoundNDPs),
+                        0])
+    # Note: You must set delimiter to '\t' and newline to '\n'. Otherwise, points will be deducted.
+    np.savetxt(curr_dir + ndp_filename, ndp_array,delimiter='\t',newline='\n')
+    np.savetxt(curr_dir + summary_filename,S_array,delimiter='\t',newline='\n')
     
     # return nondominated_Z
-    # return ndp_array
+    return ndp_array
 
-# print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",2))
+print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",2))
 #print(SolveKnapsack("inst_n375_m2_j2.txt",2))
