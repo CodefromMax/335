@@ -65,6 +65,10 @@ def MOP_Generator(n,m,J,U):
     return c_total_list, a_total_list, b
 
     
+<<<<<<< HEAD
+# MOP_Generator(5,1,2,40)
+=======
 #MOP_Generator(5,1,2,40)
+>>>>>>> a389e27d9681ee1cb95154f2052bbc4de08ff0c2
 
 
