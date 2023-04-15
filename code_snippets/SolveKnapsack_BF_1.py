@@ -187,39 +187,15 @@ def get_supernal_z(n, C, model):
 
   return np.dot(C, x_sol)
 
-def sort1(Z):
-
-      # initialize an empty list to store the non-dominated solutions
-      non_dominated_solutions = []
-
-      # initialize a dictionary to store the set of solutions that dominate each solution
-      dominated_by = {}
-
-      # initialize the non-domination rank for each solution to 0
-      non_domination_rank = {i: 0 for i in range(len(Z))}
-
-      # loop over each solution and compare it with all other solutions
-      for i in range(len(Z)):
-          for j in range(len(Z)):
-              if i == j:
-                  continue
-              if all(Z[i][k] <= Z[j][k] for k in range(len(Z[i]))):
-                  # solution i is dominated by solution j
-                  if j not in dominated_by:
-                      dominated_by[j] = set()
-                  dominated_by[j].add(i)
-              elif all(Z[i][k] >= Z[j][k] for k in range(len(Z[i]))):
-                  # solution i dominates solution j
-                  non_domination_rank[j] += 1
-          if non_domination_rank[i] == 0:
-              # solution i is non-dominated
-              non_dominated_solutions.append(Z[i])
-
-      # sort the non-dominated solutions based on their non-domination ranks
-      non_dominated_solutions.sort(key=lambda x: non_domination_rank[Z.index(x)])
-
-
-      return non_dominated_solutions
+def quicksort(Z):
+    if len(Z) <= 1:
+        return Z
+    else:
+        piv = Z[len(Z)//2]
+        left = [x for x in Z if x < piv]
+        middle = [x for x in Z if x == piv]
+        right = [x for x in Z if x > piv]
+        return quicksort(left) + middle + quicksort(right)
 
 def SolveKnapsack(filename, method=1):  
     # Dummy group number. Should be replaced by your number
@@ -258,8 +234,8 @@ def SolveKnapsack(filename, method=1):
         #remove duplicated 
         Z_removed_dup = list(set(tuple(z) for z in Z))
 
-        # sort1
-        sort1(Z_removed_dup)
+        # BF1: quicksort
+        Z_removed_dup = quicksort(Z_removed_dup)
 
         FoundNDPs = Z_removed_dup.copy()
 

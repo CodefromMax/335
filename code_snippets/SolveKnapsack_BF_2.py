@@ -187,9 +187,19 @@ def get_supernal_z(n, C, model):
 
   return np.dot(C, x_sol)
 
-def sort2(Z):
-    Z.sort(key=lambda x: x[0])
-    return Z
+def reverse_quicksort(Z):
+    if len(Z) <= 1:
+        return Z
+    pivot = Z[0]
+    left = []
+    right = []
+    for i in range(1, len(Z)):
+        if Z[i] >= pivot: 
+            left.append(Z[i])
+        else:
+            right.append(Z[i])
+    return reverse_quicksort(left) + [pivot] + reverse_quicksort(right)
+
 
 def SolveKnapsack(filename, method=1):  
     # Dummy group number. Should be replaced by your number
@@ -229,7 +239,7 @@ def SolveKnapsack(filename, method=1):
         Z_removed_dup = list(set(tuple(z) for z in Z))
 
         # sort2
-        sort2(Z_removed_dup)
+        Z_removed_dup = reverse_quicksort(Z_removed_dup)
 
         FoundNDPs = Z_removed_dup.copy()
 
