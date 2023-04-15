@@ -342,27 +342,26 @@ def SolveKnapsack(filename, method=1):
                             Regions.append(z_new)
                 
                 if J >= 3:
-                    remove_index = []
-                    count = 0
+                    remove_regions = []
                     for i in range(len(Regions)):
-                        for j in range(len(Regions)):
-                            if all(Regions[i][k] <= Regions[j][k] for k in range(len(Regions[i]))) and i != j:
-                                remove_index.append(i)
+                         for j in range(len(Regions)):
+                             if all(Regions[i][k] <= Regions[j][k] for k in range(len(Regions[i]))) and i != j and Regions[i] not in remove_regions:
+                                remove_regions.append(Regions[i])
+      
+                    for reg in remove_regions:
+                        if reg in Regions:
+                            Regions.remove(reg)
 
-                    for i in remove_index:
-                        Regions.pop(i-count)
-                        count += 1
             else:
-                #print("removed",Regions[0])
                 Regions.remove(Regions[0])
-                #print("R",Regions)
+                
     
     solution_time = time.time()-current_time
 
 
     # Output result
-    ndp_filename = f'{methodName}_NDP_375_{groupNo}.txt'
-    summary_filename = f'{methodName}_SUMMARY_375_{groupNo}.txt'
+    ndp_filename = f'{methodName}_NDP_t2_{groupNo}.txt'
+    summary_filename = f'{methodName}_SUMMARY_t2_{groupNo}.txt'
 
     # TODO: Export NDP and Summary files
     
@@ -388,4 +387,4 @@ def SolveKnapsack(filename, method=1):
 
 #print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",3))
 #print(SolveKnapsack("inst_n375_m2_j2.txt",3))
-#print(SolveKnapsack("test_inst_2.txt",3))
+print(SolveKnapsack("test_inst_2.txt",3))
