@@ -1,19 +1,21 @@
 # imports
+import numpy as np
+import itertools
 import time
 import copy
 import collections
 import queue as Q
-import numpy as np
 import pandas as pd
 import scipy as sp
-import itertools
-
 import os
+
+
 import gurobipy as gp
-from gurobipy import GRB
+# Disable gurobi logging
 gp.setParam("OutputFlag", 0)
 #gp.setParam("MIPGap", 0)
 gp.setParam("MIPGap", 1e-6)
+
 
 def read_instance(file_name):
     l = []
@@ -105,7 +107,7 @@ def lexmin(model, J, first_obj=1, NW=None, SE=None):
         z2.ub, z2.lb = NW[1], SE[1]               # SE.y <= z2 <= NW.y
     else:
         raise ValueError('Invalid NW and SE')
-      
+        
     # .Obj allows you modify the objective coefficient of a given variable
     # Modify the objective to: 1 x z_1 + 0 x z_2 = z_1 if first_obj == 1
     # Or modify the objective to: 0 x z_1 + 1 x z_2 = z_2 if first_obj == 2
@@ -120,7 +122,6 @@ def lexmin(model, J, first_obj=1, NW=None, SE=None):
     
     # Checking the model status to verify if the model is solved to optimality
     if model.status == 2:
-
         first_obj_val = int(np.round(model.objval))
         
         # Update bound and objective coefficients
@@ -141,6 +142,54 @@ def lexmin(model, J, first_obj=1, NW=None, SE=None):
             return [first_obj_val, second_obj_val] if first_obj == 1 else [second_obj_val, first_obj_val]
                         
     return None
+
+
+# Create the model object
+def get_weighted_sum_model(n, m, J, C, A, B, region, lam):
+    model = gp.Model()
+
+    # x is a binary decision variable with n dimensions
+    x = model.addVars(n, vtype='B', name='x')
+    
+    # Define variables for objective
+    z = []
+    for i in range(J):
+        z.append(model.addVar(vtype='I', name=f'z_{i}'))
+
+    # Attach the vars to the model object
+    model._x = x
+    model._z = z
+        
+    # Set the objectives
+    for i in range(J):
+        model.addConstr(z[i] == gp.quicksum(C[i][j]*x[j] for j in range(n)))
+
+
+    # The x in \mathcal X constraint
+    for i in range(m):
+        model.addConstr(gp.quicksum(A[i][j]*x[j] for j in range(n)) <= B[i][0])
+
+    # The constraints imposed by the region. Since we have defined the objective as 
+    # a variable, we can simply modify its upper bound to impose the constraint.
+    for i in range(J):
+        z[i].ub = region[i]
+        z[i].lb = -gp.GRB.INFINITY
+
+    # Objective
+    model.setObjective(gp.quicksum(lam[i]*z[i] for i in range(J)), 
+                       sense=gp.GRB.MINIMIZE)
+    
+    return model
+
+def get_supernal_z(n, C, model):
+  x_var = model._x
+  x_sol = [int(np.round(x_var[i].x)) for i in range(n)]
+
+  return np.dot(C, x_sol)
+
+def sort2(Z):
+    Z.sort(key=lambda x: x[0])
+    return Z
 
 def SolveKnapsack(filename, method=1):  
     # Dummy group number. Should be replaced by your number
@@ -179,7 +228,8 @@ def SolveKnapsack(filename, method=1):
         #remove duplicated 
         Z_removed_dup = list(set(tuple(z) for z in Z))
 
-
+        # sort2
+        sort2(Z_removed_dup)
 
         FoundNDPs = Z_removed_dup.copy()
 
@@ -217,7 +267,6 @@ def SolveKnapsack(filename, method=1):
         second_lex = 0
         m = len(A_int)
         J = len(C_int)
-        print(type(C_int[0][0]), type(A_int[0][0]), type(b_int[0][0]))
         model = get_model(n, m, J, C_int, A_int, b_int)
         
         first_lex = lexmin(model,J, 1)
@@ -226,49 +275,102 @@ def SolveKnapsack(filename, method=1):
         FoundNDPs.append(first_lex)
         FoundNDPs.append(second_lex)
 
-       
-        #print(first_lex,second_lex)
-    
-        Rectangles = [[first_lex,second_lex]]
 
+        # print(first_lex,second_lex)
+
+        Rectangles = [[first_lex,second_lex]]
         while len(Rectangles) != 0:
-        
             picked_rect = Rectangles[0]
-            # `print`(picked_rect)
+            print(picked_rect)
             Rectangles.remove(picked_rect)
             
-            # Bisect to creat the bottom rectangle
-            R_2 = [[picked_rect[0][0],(picked_rect[0][1]+picked_rect[1][1])/2],picked_rect[1]]
+            R_2 = [(picked_rect[0],(picked_rect[0][1]+picked_rect[1][1])/2),picked_rect[1]]
             # print(R_2[0][0][0])
             # print(R_2[0][1])
-            z_1 = lexmin(model,J, first_obj=1, NW = R_2[0], SE = R_2[1])
+            z_1 = lexmin(model,J, first_obj=1,NW = [R_2[0][0][0],R_2[0][1]],SE = R_2[1])
 
             if z_1 != R_2[1]:
                 FoundNDPs.append(z_1)
+                print("z_1",z_1)
                 Rectangles.append([z_1,R_2[1]])
 
-            # Refine the top rectangle 
-            R_3 = [picked_rect[0],[z_1[0]-1,(picked_rect[0][1]+picked_rect[1][1])/2]]
-            z_2 = lexmin(model,J,first_obj =2, NW = R_3[0],SE = R_3[1])
-            
+                #Check if use R_2[0], Z1, -1 , 
+            R_3 = [picked_rect[0],(z_1[0]-1,(picked_rect[0][1]+picked_rect[1][1])/2)]
+            z_2 = lexmin(model,J,first_obj =2, NW = R_3[0],SE = [R_3[1][0],R_3[1][1]])
             if z_2 != R_3[0]:
                 FoundNDPs.append(z_2)
+                print("z_2",z_2)
                 Rectangles.append([R_3[0],z_2])
+        
 
+    elif method == 3:
+        methodName = "SPM"
+        # TODO: Read and solve an instance via Supernal Method (SPM)
+        n,b_k,c_i,a_ik = read_instance(filename)
+        C_int = [cc.astype(int).tolist() for cc in c_i]
+        A_int = [a.astype(int).tolist() for a in a_ik]
+        b_int = [b.tolist() for b in b_k]
+        n = int(n[0])
+        m = len(A_int)
+        J = len(C_int)
 
+        FoundNDPs = []
+        z_s = [0]*J   # supernal point of MOP
+        Regions = [z_s] # Initiallize the Regions list
+        lam = [1]*J # Lambda
+        num_region = 1
+        # Only called once before the while-loop
+        model = get_weighted_sum_model(n, m, J, C_int, A_int, b_int, z_s, lam)
 
+        while len(Regions) != 0 :
+            picked_region = Regions[0] # pick a region in Regions list
+            # Reuse model. Only update bounds instead of creating a new model.
+            for i, r in enumerate(picked_region):
+                model._z[i].ub = r
+            model.update()
+            model.optimize()
+
+            # Checking the model status to verify if the model is solved to optimality (Feasible)
+            if model.status == 2: 
+                num_region += J
+                z_n = get_supernal_z(n, C_int, model)
+                FoundNDPs.append(z_n)
+                #print("z_n:",z_n)
+
+                for i in Regions:
+                    if (z_n <= i).all():
+                        Regions.remove(i)
+                        for j in range(J):
+                            z_new = i.copy()
+                            z_new[j] = z_n[j]-1
+                            Regions.append(z_new)
+                
+                if J >= 3:
+                    remove_index = []
+                    count = 0
+                    for i in range(len(Regions)):
+                        for j in range(len(Regions)):
+                            if all(Regions[i][k] <= Regions[j][k] for k in range(len(Regions[i]))) and i != j:
+                                remove_index.append(i)
+
+                    for i in remove_index:
+                        Regions.pop(i-count)
+                        count += 1           
+            
+            else:
+                #print("removed",Regions[0])
+                Regions.remove(Regions[0])
+                #print("R",Regions)
+    
     solution_time = time.time()-current_time
 
 
-
-
-
-
     # Output result
-    ndp_filename = f'{methodName}_NDP_{groupNo}_large.txt'
-    summary_filename = f'{methodName}_SUMMARY_{groupNo}_large.txt'
+    ndp_filename = f'{methodName}_NDP_more_{groupNo}.txt'
+    summary_filename = f'{methodName}_SUMMARY_more_{groupNo}.txt'
 
     # TODO: Export NDP and Summary files
+    
     curr_dir = os.getcwd() + '/'
     
     
@@ -278,13 +380,16 @@ def SolveKnapsack(filename, method=1):
 
     S_array = np.array([solution_time,
                         len(FoundNDPs),
-                        0])
+                        num_region])
     # Note: You must set delimiter to '\t' and newline to '\n'. Otherwise, points will be deducted.
     np.savetxt(curr_dir + ndp_filename, ndp_array,delimiter='\t',newline='\n')
     np.savetxt(curr_dir + summary_filename,S_array,delimiter='\t',newline='\n')
     
     # return nondominated_Z
     return ndp_array
+   
 
-print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",2))
-#print(SolveKnapsack("inst_n375_m2_j2.txt",2))
+    
+
+#print(SolveKnapsack("n_5_m_1_J_2_U_40.txt",3))
+print(SolveKnapsack("inst_n375_m2_j2.txt",3))
